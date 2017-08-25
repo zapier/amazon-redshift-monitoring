@@ -28,7 +28,7 @@ import pg8000
 __version__ = "1.3"
 
 logging.basicConfig(format='%(levelname) -10s %(asctime)s %(module)s at line %(lineno)d: %(message)s')
-logger = logging.getLogger('interval')
+logger = logging.getLogger('redshift-monitoring')
 
 
 # Configuration
