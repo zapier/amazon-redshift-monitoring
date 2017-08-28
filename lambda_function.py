@@ -94,12 +94,12 @@ class Reporter(object):
                 total_rows += tbl_rows
 
         if number_tables_skew > 0:
-            avg_skew_ratio = total_skew_ratio / number_tables_skew
+            avg_skew_ratio = total_skew_ratio / float(number_tables_skew)
         else:
             avg_skew_ratio = 0
 
         if number_tables_skew_sort > 0:
-            avg_skew_sort_ratio = total_skew_sort_ratio / number_tables_skew_sort
+            avg_skew_sort_ratio = total_skew_sort_ratio / float(number_tables_skew_sort)
         else:
             avg_skew_sort_ratio = 0
 
@@ -199,6 +199,7 @@ class Reporter(object):
 
     def run_external_commands(self, command_set_type, file_name, cursor):
         if not os.path.exists(file_name):
+            logger.error("File {} does not exit.".format(file_name))
             return []
 
         try:
@@ -206,6 +207,7 @@ class Reporter(object):
         except ValueError as e:
             # handle a malformed user query set gracefully
             if e.message == "No JSON object could be decoded":
+                logger.error(e.message + " in {}".format(file_name))
                 return []
             else:
                 raise
@@ -225,6 +227,7 @@ class Reporter(object):
             try:
                 value = cursor.fetchone()[0]
             except pg8000.core.ProgrammingError:
+                logger.info("No values fetched for commamnd {}".format(command['name']))
                 value = None
 
             if value is None:
@@ -301,7 +304,7 @@ def configure():
         logger.setLevel(logging.INFO)
 
     for k, v in attr.asdict(reporter).items():
-        if v is None or not v:
+        if not v:
             logger.warning("Parameter {} is unset".format(k))
 
     return reporter
