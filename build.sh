@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ver=1.2
+ver=1.3
 
 
 if [ ! -d dist ]; then
@@ -10,9 +10,7 @@ fi
 ARCHIVE=redshift-advanced-monitoring-$ver.zip
 
 # add required dependencies
-if [ ! -d lib/pg8000 ]; then
-	pip install pg8000 -t lib
-fi
+pip install -r requirements -t lib
 
 # bin the old zipfile
 if [ -f dist/$ARCHIVE ]; then
