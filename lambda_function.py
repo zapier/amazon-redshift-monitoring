@@ -12,6 +12,7 @@
 import sys
 import os
 # add the lib directory to the path
+from copy import deepcopy
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 
@@ -273,7 +274,7 @@ class Reporter(object):
     def gather_service_class_stats(self, cursor):
         metrics = []
         poll_ts = datetime.datetime.utcnow()
-        _ = self.run_command(cursor, '''SELECT service_class, num_queued_queries, num_executing_queries 
+        self.run_command(cursor, '''SELECT service_class, num_queued_queries, num_executing_queries 
                                             FROM stv_wlm_service_class_state w WHERE w.service_class >= 6 ORDER BY 1
                                     ''')
         service_class_info = cursor.fetchall()
@@ -283,13 +284,13 @@ class Reporter(object):
                              'Dimensions': [{'Name': self.environment, 'Value': self.cluster}],
                              'Timestamp': poll_ts,
                              'Value': service_class[1]}
-            metrics.append(queued_metric.copy())
+            metrics.append(deepcopy(queued_metric))
 
             executing_metric = {'MetricName': 'ServiceClass%s-Executing' % service_class[0],
                                 'Dimensions': [{'Name': self.environment, 'Value': self.cluster}],
                                 'Timestamp': poll_ts,
                                 'Value': service_class[2]}
-            metrics.append(executing_metric.copy())
+            metrics.append(deepcopy(executing_metric))
 
         return metrics
 
