@@ -402,10 +402,11 @@ if __name__ == "__main__":
         # Run every minute if not in lambda
         run = 0
         start = datetime.datetime.now()
+        log_and_notify("Starting at {}".format(str(start)), logger.info)
         while True:
             run += 1
             lambda_handler(sys.argv[0], None)
             if run % 1000 == 0:
                 now = datetime.datetime.now()
-                log_and_notify("Running for {}, performed {} runs".format(str(now), run))
+                log_and_notify("Running for {}, performed {} runs".format(str(now), run), logger.info)
             sleep(60)
