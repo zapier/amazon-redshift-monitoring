@@ -351,10 +351,10 @@ def lambda_handler(event, context):
                               port=5439,
                               ssl=reporter.ssl)
     except (pg8000.InterfaceError, pg8000.ProgrammingError) as e:
-        log_and_notify('Redshift Connection Failed: exception {}'.format(e), logger.error)
+        log_and_notify('Redshift Connection Failed: exception {}... Exiting...'.format(e), logger.error)
         sys.exit(1)
 
-    log_and_notify('Successfully Connected to Cluster', logger.debug)
+    logger.debug('Successfully Connected to {}'.format(reporter.host))
     cursor = conn.cursor()
 
     # collect table statistics
