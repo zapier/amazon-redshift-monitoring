@@ -27,7 +27,6 @@ import json
 import logging
 from time import sleep
 import pg8000
-import humanize
 
 __version__ = "1.3"
 
