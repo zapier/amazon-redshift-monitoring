@@ -14,6 +14,8 @@ import os
 # add the lib directory to the path
 from copy import deepcopy
 
+import requests
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 
 import attr
@@ -30,6 +32,17 @@ __version__ = "1.3"
 
 logging.basicConfig(format='%(levelname) -10s %(asctime)s %(module)s at line %(lineno)d: %(message)s')
 logger = logging.getLogger('redshift-monitoring')
+
+
+def log_and_notify(msg, logfun):
+    payload = {"bot_name": "Watcher of Redshift", "bot_icon": ":redshift:", "message": msg}
+    hook = os.environ.get("SLACK_CHANNEL_WEBHOOK")
+    logfun(msg)
+    try:
+        requests.post(hook, data=json.dumps(payload),
+                      headers={"Content-Type": "application/json"})
+    except requests.exceptions.MissingSchema:
+        logger.error("SLACK_CHANNEL_WEBHOOK environment variable not set.")
 
 
 # Configuration
@@ -266,7 +279,7 @@ class Reporter(object):
         try:
             cursor.execute(statement)
         except pg8000.core.ProgrammingError as e:
-            logger.error('Error executing statement %s: %s', statement, e)
+            log_and_notify('Error executing statement {}: {}'.format(statement, e), logger.error)
         interval = (datetime.datetime.now() - t).microseconds / 1000
 
         return interval
@@ -323,7 +336,7 @@ def lambda_handler(event, context):
         # Check if decryption is possible
         password = kms.decrypt(CiphertextBlob=base64.b64decode(reporter.encrypted_password))['Plaintext']
     except:
-        logger.error('KMS access failed: exception %s' % sys.exc_info()[1])
+        log_and_notify('KMS access failed: exception {}'.format(sys.exc_info()[1]), logger.error)
         raise
 
     try:
@@ -338,10 +351,10 @@ def lambda_handler(event, context):
                               port=5439,
                               ssl=reporter.ssl)
     except (pg8000.InterfaceError, pg8000.ProgrammingError) as e:
-        logger.error('Redshift Connection Failed: exception %s' % e)
+        log_and_notify('Redshift Connection Failed: exception {}'.format(e), logger.error)
         sys.exit(1)
 
-    logger.debug('Successfully Connected to Cluster')
+    log_and_notify('Successfully Connected to Cluster', logger.debug)
     cursor = conn.cursor()
 
     # collect table statistics
