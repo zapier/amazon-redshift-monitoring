@@ -95,12 +95,12 @@ class Reporter(object):
                 total_rows += tbl_rows
 
         if number_tables_skew > 0:
-            avg_skew_ratio = total_skew_ratio / float(number_tables_skew)
+            avg_skew_ratio = total_skew_ratio / number_tables_skew
         else:
             avg_skew_ratio = 0
 
         if number_tables_skew_sort > 0:
-            avg_skew_sort_ratio = total_skew_sort_ratio / float(number_tables_skew_sort)
+            avg_skew_sort_ratio = total_skew_sort_ratio / number_tables_skew_sort
         else:
             avg_skew_sort_ratio = 0
 
