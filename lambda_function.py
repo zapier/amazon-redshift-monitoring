@@ -27,6 +27,7 @@ import json
 import logging
 from time import sleep
 import pg8000
+import humanize
 
 __version__ = "1.3"
 
@@ -400,6 +401,12 @@ if __name__ == "__main__":
         lambda_handler(sys.argv[0], None)
     else:
         # Run every minute if not in lambda
+        run = 0
+        start = datetime.datetime.now()
         while True:
+            run += 1
             lambda_handler(sys.argv[0], None)
+            if run % 1000 == 0:
+                now = datetime.datetime.now()
+                log_and_notify("Running for {}, performed {} runs".format(str(now), run))
             sleep(60)
