@@ -408,5 +408,5 @@ if __name__ == "__main__":
             lambda_handler(sys.argv[0], None)
             if run % 1000 == 0:
                 now = datetime.datetime.now()
-                log_and_notify("Running for {}, performed {} runs".format(str(now), run), logger.info)
+                log_and_notify("Running since {}, performed {} runs".format(str(now), run), logger.info)
             sleep(60)
