@@ -1,0 +1,42 @@
+# ansible-playbook playbook.yml --extra-vars "target=10.0.17.176" --private-key ~/.ssh/drazen.urch.pem -u ubuntu -b
+---
+- hosts: "{{target}}"
+  vars:
+    ubuntu: xenial
+    config: zapier-data-config/config
+    service: amazon-redshift-monitoring
+    workdir: /tmp/{{service}}
+  roles:
+    - { role: Datadog.datadog, become: yes, datadog_api_key: "{{datadog_api_key}}" }
+#    - { role: roles/docker.yml, become: yes }
+#    - { role: roles/secrets.yml, become: yes }
+  tasks:
+  - apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+  - apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu {{ubuntu}} stable
+      state: present
+  - apt:
+      name: docker-ce
+      update_cache: yes
+  - pip:
+      name: awscli
+  - git:
+      repo: https://github.com/zapier/{{service}}
+      dest: "{{workdir}}"
+  - name: Get .env file from s3
+    command: aws s3 cp s3://{{config}}/{{service}}.env .env
+    args:
+      chdir: "{{workdir}}"
+  - name: Docker build
+    command: "docker build . -t zapier:{{service}}"
+    args:
+      chdir: "{{workdir}}"
+  - name: Docker stop if running
+    shell: "docker ps | grep {{service}} | awk '{print $1}' | xargs -n1 docker stop"
+  - name: Docker run, detach
+    command: "docker run --env-file .env -d {{service}}"
+    args:
+      chdir: "{{workdir}}"
+
