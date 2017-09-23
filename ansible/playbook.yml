@@ -5,8 +5,8 @@
     config: zapier-data-config/config
     service: amazon-redshift-monitoring
     workdir: /tmp/{{service}}
-  roles:
-    - { role: Datadog.datadog, become: yes, datadog_api_key: "{{datadog_api_key}}" }
+#  roles:
+#    - { role: Datadog.datadog, become: yes, datadog_api_key: "{{datadog_api_key}}" }
   tasks:
   - apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
@@ -27,11 +27,12 @@
     args:
       chdir: "{{workdir}}"
   - name: Docker build
-    command: "docker build . -t zapier:{{service}}"
+    command: "docker build . -t {{service}}"
     args:
       chdir: "{{workdir}}"
   - name: Docker stop if running
-    shell: "docker ps | grep {{service}} | awk '{print $1}' | xargs -n1 docker stop"
+    shell: "docker ps | grep {{service}} | awk '{print $1}' | xargs -n1 docker stop || true"
+    ignore_errors: yes
   - name: Docker run, detach
     command: "docker run --env-file .env -d {{service}}"
     args:
