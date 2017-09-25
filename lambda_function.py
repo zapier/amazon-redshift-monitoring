@@ -66,7 +66,7 @@ class Reporter(object):
         self.run_command(cursor, '''SELECT /* Lambda CloudWatch Exporter */ 
                                   \"schema\" || '.' || \"table\" AS table, 
                                   encoded, max_varchar, unsorted, stats_off, tbl_rows, skew_sortkey1, skew_rows 
-                                  FROM svv_table_info where \"schema\" = public''')
+                                  FROM svv_table_info where \"schema\" = 'public' ''')
 
         tables_not_compressed = 0
         max_skew_ratio = 0
